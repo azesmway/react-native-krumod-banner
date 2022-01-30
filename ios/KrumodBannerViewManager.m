@@ -1,4 +1,5 @@
 #import <React/RCTViewManager.h>
+#import "KrumodBannerView.h"
 
 @interface KrumodBannerViewManager : RCTViewManager
 @end

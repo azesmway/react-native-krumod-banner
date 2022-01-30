@@ -1,9 +1,4 @@
-import {
-  requireNativeComponent,
-  UIManager,
-  Platform,
-  ViewStyle,
-} from 'react-native';
+import { requireNativeComponent, UIManager, Platform } from 'react-native';
 
 const LINKING_ERROR =
   `The package 'react-native-krumod-banner' doesn't seem to be linked. Make sure: \n\n` +
@@ -11,10 +6,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-type KrumodBannerProps = {
-  color: string;
-  style: ViewStyle;
-};
+type KrumodBannerProps = {};
 
 const ComponentName = 'KrumodBannerView';
 
