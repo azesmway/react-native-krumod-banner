@@ -6,7 +6,7 @@ import { KrumodBannerView } from 'react-native-krumod-banner';
 export default function App() {
   return (
     <View style={styles.container}>
-      <KrumodBannerViewManager color="#32a852" style={styles.box} />
+      <KrumodBannerView />
     </View>
   );
 }
