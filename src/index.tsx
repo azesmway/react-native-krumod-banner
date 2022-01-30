@@ -6,7 +6,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-type KrumodBannerProps = {};
+export interface KrumodBannerProps {}
 
 const ComponentName = 'KrumodBannerView';
 
