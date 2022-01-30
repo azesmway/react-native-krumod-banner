@@ -9,7 +9,7 @@ RCT_EXPORT_MODULE(KrumodBannerView)
 
 - (UIView *)view
 {
-  return [[UIView alloc] init];
+  return [[KrumodBannerView alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(color, NSString, UIView)
