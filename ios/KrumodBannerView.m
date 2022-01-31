@@ -15,7 +15,7 @@ typedef NS_ENUM(NSInteger)
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher {
     if (self = [super init]) {
         _isLoaded = NO;
-        _isVisible = 0;
+        _isVisible = BANNER_NOT_VISIBLE;
     }
     return self;
 }
@@ -55,6 +55,25 @@ typedef NS_ENUM(NSInteger)
             _isVisible = BANNER_NOT_VISIBLE;
             NSLog(@"BANNER - BANNER_NOT_VISIBLE");
             // _onAdVisibleChange(@{@"visible": @(BANNER_NOT_VISIBLE)});
+        }
+    }
+
+    if (_isVisible != BANNER_NOT_VISIBLE) {
+        int hV = self.frame.size.height;
+        int hR = clipRect.size.height;
+        int yR = clipRect.origin.y;
+
+        if (yR <= hV) {
+            int percent = 100 - ((hV - hR) * 100 / hV);
+
+            if (clipRect.origin.y > 0) {
+                hR = clipRect.origin.y;
+                percent = ((hV - hR) * 100 / hV);
+            }
+
+            if (hR > 0 && hR <= hV) {
+                NSLog(@"BANNER - setVisibleBanner %d", percent);
+            }
         }
     }
 }

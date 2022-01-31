@@ -5,11 +5,10 @@
 #endif
 
 #import <React/RCTEventDispatcher.h>
-#import <React/RCTShadowView.h>
-#import <React/UIView+React.h>
-#import <UIKit/UIKit.h>
 
 @interface KrumodBannerView: RCTView
+
+@property (nonatomic) NSInteger *percentVisibility;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher;
 
