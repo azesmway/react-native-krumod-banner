@@ -37,35 +37,11 @@ typedef NS_ENUM(NSInteger)
 
     if (!CGSizeEqualToSize(CGRectIntersection(clipRect, self.frame).size, CGSizeZero)) {
         if (!CGRectContainsRect(clipRect, self.frame)) {
-            int percents = 0;
-
-            if (self.frame.size.height == clipRect.size.height) {
-                if (_isVisible != BANNER_FULLY_VISIBLE) {
-                    _isVisible = BANNER_FULLY_VISIBLE;
-
-                    if (_isSendNotification == NO) {
-                        _isSendNotification = YES;
-                        _onAdVisibleChangeReceived(@{@"visible": @(BANNER_PERCENT_VISIBLE), @"id": _idBanner});
-                    }
-
-                    _onAdVisibleChangeReceived(@{@"visible": @(BANNER_FULLY_VISIBLE), @"id": _idBanner});
-                }
-
-                return;
+            if (_horizontal) {
+                [self calculationVisibilityHorizontal:clipRect];
+            } else {
+                [self calculationVisibilityVertical:clipRect];
             }
-
-            if (clipRect.origin.y > 0 && clipRect.size.height < self.frame.size.height) {
-                percents = (self.frame.size.height - clipRect.origin.y) * 100 / self.frame.size.height;
-                if (percents > 0) {
-                    [self onPercentVisibility:percents];
-                }
-            } else if (clipRect.origin.y == 0 && clipRect.size.height > 0) {
-                percents = 100 - ((self.frame.size.height - clipRect.size.height) * 100 / self.frame.size.height);
-                if (percents > 0) {
-                    [self onPercentVisibility:percents];
-                }
-            }
-
         } else {
             if (_isVisible != BANNER_FULLY_VISIBLE) {
                 _isVisible = BANNER_FULLY_VISIBLE;
@@ -83,6 +59,68 @@ typedef NS_ENUM(NSInteger)
             _isSendNotification = NO;
             _isVisible = BANNER_NOT_VISIBLE;
             _onAdVisibleChangeReceived(@{@"visible": @(BANNER_NOT_VISIBLE), @"id": _idBanner});
+        }
+    }
+}
+
+- (void) calculationVisibilityHorizontal:(CGRect)clipRect {
+    int percents = 0;
+
+    if (self.frame.size.height == clipRect.size.height) {
+        if (_isVisible != BANNER_FULLY_VISIBLE) {
+            _isVisible = BANNER_FULLY_VISIBLE;
+
+            if (_isSendNotification == NO) {
+                _isSendNotification = YES;
+                _onAdVisibleChangeReceived(@{@"visible": @(BANNER_PERCENT_VISIBLE), @"id": _idBanner});
+            }
+
+            _onAdVisibleChangeReceived(@{@"visible": @(BANNER_FULLY_VISIBLE), @"id": _idBanner});
+        }
+
+        return;
+    }
+
+    if (clipRect.origin.y > 0 && clipRect.size.height < self.frame.size.height) {
+        percents = (self.frame.size.height - clipRect.origin.y) * 100 / self.frame.size.height;
+        if (percents > 0) {
+            [self onPercentVisibility:percents];
+        }
+    } else if (clipRect.origin.y == 0 && clipRect.size.height > 0) {
+        percents = 100 - ((self.frame.size.height - clipRect.size.height) * 100 / self.frame.size.height);
+        if (percents > 0) {
+            [self onPercentVisibility:percents];
+        }
+    }
+}
+
+- (void) calculationVisibilityVertical:(CGRect)clipRect {
+    int percents = 0;
+
+    if (self.frame.size.height == clipRect.size.height) {
+        if (_isVisible != BANNER_FULLY_VISIBLE) {
+            _isVisible = BANNER_FULLY_VISIBLE;
+
+            if (_isSendNotification == NO) {
+                _isSendNotification = YES;
+                _onAdVisibleChangeReceived(@{@"visible": @(BANNER_PERCENT_VISIBLE), @"id": _idBanner});
+            }
+
+            _onAdVisibleChangeReceived(@{@"visible": @(BANNER_FULLY_VISIBLE), @"id": _idBanner});
+        }
+
+        return;
+    }
+
+    if (clipRect.origin.y > 0 && clipRect.size.height < self.frame.size.height) {
+        percents = (self.frame.size.height - clipRect.origin.y) * 100 / self.frame.size.height;
+        if (percents > 0) {
+            [self onPercentVisibility:percents];
+        }
+    } else if (clipRect.origin.y == 0 && clipRect.size.height > 0) {
+        percents = 100 - ((self.frame.size.height - clipRect.size.height) * 100 / self.frame.size.height);
+        if (percents > 0) {
+            [self onPercentVisibility:percents];
         }
     }
 }

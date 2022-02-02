@@ -23,6 +23,7 @@ interface IKrumodBannerView extends ViewProps {
   idBanner: string;
   percentVisibility?: number;
   onAdVisibleChange?: (visible: number, idBanner: string) => void;
+  horizontal?: boolean;
 }
 
 export default class KrumodBannerView extends React.Component<IKrumodBannerView> {
@@ -30,6 +31,7 @@ export default class KrumodBannerView extends React.Component<IKrumodBannerView>
     idBanner: '',
     percentVisibility: 50,
     onAdVisibleChange: null,
+    horizontal: false,
   };
 
   constructor(props?: any) {

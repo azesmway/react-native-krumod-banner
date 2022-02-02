@@ -12,6 +12,7 @@
 
 @property (nonatomic) NSInteger * _Nullable percentVisibility;
 @property (nonatomic) NSString * _Nullable idBanner;
+@property (nonatomic) BOOL * _Nullable horizontal;
 
 @property (nonatomic, copy) RCTBubblingEventBlock _Nullable onAdVisibleChangeReceived;
 
