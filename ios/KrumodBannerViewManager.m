@@ -19,6 +19,11 @@ RCT_EXPORT_MODULE(KrumodBannerView)
     return self;
 }
 
++ (BOOL)requiresMainQueueSetup
+{
+    return NO;
+}
+
 RCT_EXPORT_VIEW_PROPERTY(percentVisibility, NSInteger *)
 
 @end
