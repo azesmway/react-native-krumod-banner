@@ -66,7 +66,7 @@ typedef NS_ENUM(NSInteger)
 - (void) calculationVisibilityHorizontal:(CGRect)clipRect {
     int percents = 0;
 
-    if (self.frame.size.height == clipRect.size.height) {
+    if (self.frame.size.width == clipRect.size.width) {
         if (_isVisible != BANNER_FULLY_VISIBLE) {
             _isVisible = BANNER_FULLY_VISIBLE;
 
@@ -81,13 +81,13 @@ typedef NS_ENUM(NSInteger)
         return;
     }
 
-    if (clipRect.origin.y > 0 && clipRect.size.height < self.frame.size.height) {
-        percents = (self.frame.size.height - clipRect.origin.y) * 100 / self.frame.size.height;
+    if (clipRect.origin.x > 0 && clipRect.size.width < self.frame.size.width) {
+        percents = (self.frame.size.width - clipRect.origin.x) * 100 / self.frame.size.width;
         if (percents > 0) {
             [self onPercentVisibility:percents];
         }
-    } else if (clipRect.origin.y == 0 && clipRect.size.height > 0) {
-        percents = 100 - ((self.frame.size.height - clipRect.size.height) * 100 / self.frame.size.height);
+    } else if (clipRect.origin.x == 0 && clipRect.size.width > 0) {
+        percents = 100 - ((self.frame.size.width - clipRect.size.width) * 100 / self.frame.size.width);
         if (percents > 0) {
             [self onPercentVisibility:percents];
         }
