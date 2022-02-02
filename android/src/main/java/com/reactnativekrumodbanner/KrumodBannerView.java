@@ -8,29 +8,54 @@ import android.view.View;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.facebook.react.views.scroll.ReactScrollView;
 import com.facebook.react.views.view.ReactViewGroup;
 
 @SuppressLint("ViewConstructor")
 public class KrumodBannerView extends ReactViewGroup {
     private ReactScrollView scrollView;
+    private final RCTEventEmitter mEventEmitter;
+
     private Boolean bannerExists = false;
+    private String idBanner = "";
+    private Boolean horizontal = false;
+    private Boolean detach = false;
+    private int percentVisibility = 50;
+
+    private static final int BANNER_NOT_VISIBLE = 0;
+    private static final int BANNER_PARTIALLY_VISIBLE = 1;
+    private static final int BANNER_PERCENT_VISIBLE = 2;
+    private static final int BANNER_FULLY_VISIBLE = 3;
+
+    private int isVisible = BANNER_NOT_VISIBLE;
+    private boolean isSendNotification = false;
 
     public KrumodBannerView(ThemedReactContext themedReactContext) {
         super(themedReactContext);
+
+        mEventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
         setLayerType(LAYER_TYPE_HARDWARE, null);
+    }
+
+    public void setIdBanner(String id) {
+        this.idBanner = id;
+    }
+
+    public void setHorizontal(Boolean h) {
+        this.horizontal = h;
+    }
+
+    public void setPercentVisibility(int p) {
+        this.percentVisibility = p;
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-    }
-
-    @Override
-    protected void onVisibilityChanged( View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        Log.d("BANNER", "onVisibilityChanged " + visibility);
     }
 
     @Override
@@ -71,33 +96,58 @@ public class KrumodBannerView extends ReactViewGroup {
     private void handleScroll(ReactScrollView scrollView) {
         if (bannerExists) {
             Rect scrollBounds = new Rect();
-
             scrollView.getHitRect(scrollBounds);
 
             if (KrumodBannerView.this.getLocalVisibleRect(scrollBounds)) {
-                Log.d("BANNER", "handleScroll VISIBLE" + ", " + getVisibilityPercents(this));
+                if (getVisibilityPercents(this) > 0 && getVisibilityPercents(this) < 100 && this.isVisible != BANNER_PARTIALLY_VISIBLE) {
+                    this.isVisible = BANNER_PARTIALLY_VISIBLE;
+                    this.onAdVisibleChangeReceived(BANNER_PARTIALLY_VISIBLE);
+                } else if (getVisibilityPercents(this) > this.percentVisibility && !this.isSendNotification && this.isVisible == BANNER_PARTIALLY_VISIBLE) {
+                    this.isSendNotification = true;
+                    this.onAdVisibleChangeReceived(BANNER_PERCENT_VISIBLE);
+                } else if (getVisibilityPercents(this) > 99 && this.isVisible == BANNER_PARTIALLY_VISIBLE) {
+                    this.isVisible = BANNER_FULLY_VISIBLE;
+                    this.onAdVisibleChangeReceived(BANNER_FULLY_VISIBLE);
+                }
             } else {
-                Log.d("BANNER", "handleScroll NOT VISIBLE");
+                this.isVisible = BANNER_NOT_VISIBLE;
+                this.isSendNotification = false;
+                this.onAdVisibleChangeReceived(BANNER_NOT_VISIBLE);
             }
         }
+    }
+
+    public void onAdVisibleChangeReceived (int visible) {
+        WritableMap event = Arguments.createMap();
+        event.putInt("visible",visible);
+        event.putString("id",this.idBanner);
+
+        mEventEmitter.receiveEvent(this.getId(), "onAdVisibleChangeReceived", event);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         bannerExists = false;
+        this.detach = true;
     }
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
 
-        if (visibility == View.VISIBLE) {
-            bannerExists = true;
-        } else {
-            bannerExists = false;
+        if (visibility == View.VISIBLE && !this.detach) {
+            if (this.isVisible != BANNER_FULLY_VISIBLE && getVisibilityPercents(this) > 0) {
+                this.isVisible = BANNER_FULLY_VISIBLE;
+
+                if (!this.isSendNotification) {
+                    this.isSendNotification = true;
+                    this.onAdVisibleChangeReceived(BANNER_PERCENT_VISIBLE);
+                }
+
+                this.onAdVisibleChangeReceived(BANNER_FULLY_VISIBLE);
+            }
         }
-        Log.d("BANNER", "onWindowVisibilityChanged " + visibility);
     }
 
     public static <T> T fintSpecifyParent(Class<T> tClass, ViewParent parent) {

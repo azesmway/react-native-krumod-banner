@@ -130,7 +130,7 @@ typedef NS_ENUM(NSInteger)
         _isVisible = BANNER_PARTIALLY_VISIBLE;
         _onAdVisibleChangeReceived(@{@"visible": @(BANNER_PARTIALLY_VISIBLE), @"id": _idBanner});
     }
-    NSLog(@"percents %ld", (long)percents);
+
     if (percents > (NSInteger)_percentVisibility && _isSendNotification == NO && _isVisible == BANNER_PARTIALLY_VISIBLE) {
         _isSendNotification = YES;
         _onAdVisibleChangeReceived(@{@"visible": @(BANNER_PERCENT_VISIBLE), @"id": _idBanner});
