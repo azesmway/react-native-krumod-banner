@@ -1,5 +1,5 @@
-import { requireNativeComponent } from 'react-native';
-import React from 'react';
+import * as React from 'react';
+import { requireNativeComponent, ViewProps } from 'react-native';
 
 const ComponentName = 'KrumodBannerView';
 
@@ -8,24 +8,26 @@ const KrumodBanner = requireNativeComponent(ComponentName);
 const BANNER_STATE_TYPE = {
   BANNER_NOT_VISIBLE: 0,
   BANNER_PARTIALLY_VISIBLE: 1,
-  BANNER_FULLY_VISIBLE: 2,
+  BANNER_PERCENT_VISIBLE: 2,
+  BANNER_FULLY_VISIBLE: 3,
 };
 
 interface INativeEvent {
   nativeEvent: {
     visible?: number;
+    id?: string;
   };
 }
 
-interface IKrumodBannerView {
-  idBanner: number;
+interface IKrumodBannerView extends ViewProps {
+  idBanner: string;
   percentVisibility?: number;
-  onAdVisibleChange?: (visible: number | undefined) => void;
+  onAdVisibleChange?: (visible: number, idBanner: string) => void;
 }
 
 export default class KrumodBannerView extends React.Component<IKrumodBannerView> {
   static defaultProps = {
-    idBanner: -1,
+    idBanner: '',
     percentVisibility: 50,
     onAdVisibleChange: null,
   };
@@ -44,7 +46,9 @@ export default class KrumodBannerView extends React.Component<IKrumodBannerView>
       ? event.nativeEvent.visible
       : BANNER_STATE_TYPE.BANNER_NOT_VISIBLE;
 
-    onAdVisibleChange && onAdVisibleChange(visible);
+    const idBanner: string = event.nativeEvent.id ? event.nativeEvent.id : '';
+
+    onAdVisibleChange && onAdVisibleChange(visible, idBanner);
   };
 
   private getProps() {

@@ -6,9 +6,14 @@
 
 #import <React/RCTEventDispatcher.h>
 
+@class RCTBridge;
+
 @interface KrumodBannerView: RCTView
 
-@property (nonatomic) NSInteger *percentVisibility;
+@property (nonatomic) NSInteger * _Nullable percentVisibility;
+@property (nonatomic) NSString * _Nullable idBanner;
+
+@property (nonatomic, copy) RCTBubblingEventBlock _Nullable onAdVisibleChangeReceived;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher;
 

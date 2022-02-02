@@ -25,5 +25,7 @@ RCT_EXPORT_MODULE(KrumodBannerView)
 }
 
 RCT_EXPORT_VIEW_PROPERTY(percentVisibility, NSInteger *)
+RCT_EXPORT_VIEW_PROPERTY(idBanner, NSString *)
+RCT_EXPORT_VIEW_PROPERTY(onAdVisibleChangeReceived, RCTBubblingEventBlock)
 
 @end
