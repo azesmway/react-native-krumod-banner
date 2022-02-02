@@ -146,6 +146,19 @@ public class KrumodBannerView extends ReactViewGroup {
                 }
 
                 this.onAdVisibleChangeReceived(BANNER_FULLY_VISIBLE);
+            } else if (this.isVisible != BANNER_FULLY_VISIBLE && scrollView == null) {
+                scrollView = KrumodBannerView.fintSpecifyParent(ReactScrollView.class, this.getParent());
+
+                if (scrollView == null) {
+                    this.isVisible = BANNER_FULLY_VISIBLE;
+
+                    if (!this.isSendNotification) {
+                        this.isSendNotification = true;
+                        this.onAdVisibleChangeReceived(BANNER_PERCENT_VISIBLE);
+                    }
+
+                    this.onAdVisibleChangeReceived(BANNER_FULLY_VISIBLE);
+                }
             }
         }
     }
