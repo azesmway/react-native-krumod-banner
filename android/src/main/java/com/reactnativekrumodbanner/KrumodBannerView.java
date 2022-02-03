@@ -12,12 +12,14 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.facebook.react.views.scroll.ReactHorizontalScrollView;
 import com.facebook.react.views.scroll.ReactScrollView;
 import com.facebook.react.views.view.ReactViewGroup;
 
 @SuppressLint("ViewConstructor")
 public class KrumodBannerView extends ReactViewGroup {
     private ReactScrollView scrollView;
+    private ReactHorizontalScrollView scrollHView;
     private final RCTEventEmitter mEventEmitter;
 
     private Boolean bannerExists = false;
@@ -62,14 +64,26 @@ public class KrumodBannerView extends ReactViewGroup {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        if (scrollView == null) {
-            scrollView = KrumodBannerView.fintSpecifyParent(ReactScrollView.class, this.getParent());
+        if (horizontal) {
+            if (scrollHView == null) {
+                scrollHView = KrumodBannerView.fintSpecifyParent(ReactHorizontalScrollView.class, this.getParent());
 
-            if (scrollView != null) {
-                setHandleScroll();
+                if (scrollHView != null) {
+                    setHandleHScroll();
+                }
+            } else {
+                setHandleHScroll();
             }
         } else {
-            setHandleScroll();
+            if (scrollView == null) {
+                scrollView = KrumodBannerView.fintSpecifyParent(ReactScrollView.class, this.getParent());
+
+                if (scrollView != null) {
+                    setHandleScroll();
+                }
+            } else {
+                setHandleScroll();
+            }
         }
     }
 
@@ -80,23 +94,47 @@ public class KrumodBannerView extends ReactViewGroup {
             scrollView.setOnScrollChangeListener(new OnScrollChangeListener() {
                 @Override
                 public void onScrollChange(View view, int i, int i1, int i2, int i3) {
-                    KrumodBannerView.this.handleScroll(scrollView);
+                    KrumodBannerView.this.handleScroll();
                 }
             });
         } else {
             scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
                 @Override
                 public void onScrollChanged() {
-                    KrumodBannerView.this.handleScroll(scrollView);
+                    KrumodBannerView.this.handleScroll();
                 }
             });
         }
     }
 
-    private void handleScroll(ReactScrollView scrollView) {
+    private void setHandleHScroll() {
+        bannerExists = true;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            scrollHView.setOnScrollChangeListener(new OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View view, int i, int i1, int i2, int i3) {
+                    KrumodBannerView.this.handleScroll();
+                }
+            });
+        } else {
+            scrollHView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+                @Override
+                public void onScrollChanged() {
+                    KrumodBannerView.this.handleScroll();
+                }
+            });
+        }
+    }
+
+    private void handleScroll() {
         if (bannerExists) {
             Rect scrollBounds = new Rect();
-            scrollView.getHitRect(scrollBounds);
+            if (horizontal) {
+                scrollHView.getHitRect(scrollBounds);
+            } else {
+                scrollView.getHitRect(scrollBounds);
+            }
 
             if (KrumodBannerView.this.getLocalVisibleRect(scrollBounds)) {
                 if (getVisibilityPercents(this) > 0 && getVisibilityPercents(this) < 100 && this.isVisible != BANNER_PARTIALLY_VISIBLE) {
@@ -146,10 +184,11 @@ public class KrumodBannerView extends ReactViewGroup {
                 }
 
                 this.onAdVisibleChangeReceived(BANNER_FULLY_VISIBLE);
-            } else if (this.isVisible != BANNER_FULLY_VISIBLE && scrollView == null) {
+            } else if (this.isVisible != BANNER_FULLY_VISIBLE && scrollView == null && scrollHView == null) {
                 scrollView = KrumodBannerView.fintSpecifyParent(ReactScrollView.class, this.getParent());
+                scrollHView = KrumodBannerView.fintSpecifyParent(ReactHorizontalScrollView.class, this.getParent());
 
-                if (scrollView == null) {
+                if (scrollView == null && scrollHView == null) {
                     this.isVisible = BANNER_FULLY_VISIBLE;
 
                     if (!this.isSendNotification) {
@@ -175,23 +214,39 @@ public class KrumodBannerView extends ReactViewGroup {
         }
     }
 
-    public static int getVisibilityPercents(View view) {
+    public int getVisibilityPercents(View view) {
         final Rect currentViewRect = new Rect();
 
         int percents = 100;
 
-        int height = (view == null || view.getVisibility() != View.VISIBLE) ? 0 : view.getHeight();
+        if (horizontal) {
+            int width = (view == null || view.getVisibility() != View.VISIBLE) ? 0 : view.getWidth();
 
-        if (height == 0) {
-            return 0;
-        }
+            if (width == 0) {
+                return 0;
+            }
+            view.getLocalVisibleRect(currentViewRect);
 
-        Boolean v = view.getLocalVisibleRect(currentViewRect);
+            if (viewIsPartiallyHiddenLeft(currentViewRect)) {
+                percents = (width - currentViewRect.left) * 100 / width;
+            } else if (viewIsPartiallyHiddenRight(currentViewRect, width)) {
+                percents = currentViewRect.right * 100 / width;
+            }
 
-        if(viewIsPartiallyHiddenTop(currentViewRect)){
-            percents = (height - currentViewRect.top) * 100 / height;
-        } else if(viewIsPartiallyHiddenBottom(currentViewRect, height)){
-            percents = currentViewRect.bottom * 100 / height;
+        } else {
+            int height = (view == null || view.getVisibility() != View.VISIBLE) ? 0 : view.getHeight();
+
+            if (height == 0) {
+                return 0;
+            }
+
+            view.getLocalVisibleRect(currentViewRect);
+
+            if (viewIsPartiallyHiddenTop(currentViewRect)) {
+                percents = (height - currentViewRect.top) * 100 / height;
+            } else if (viewIsPartiallyHiddenBottom(currentViewRect, height)) {
+                percents = currentViewRect.bottom * 100 / height;
+            }
         }
 
         return percents;
@@ -203,5 +258,13 @@ public class KrumodBannerView extends ReactViewGroup {
 
     private static boolean viewIsPartiallyHiddenTop(Rect currentViewRect) {
         return currentViewRect.top > 0;
+    }
+
+    private static boolean viewIsPartiallyHiddenRight(Rect currentViewRect, int width) {
+        return currentViewRect.right > 0 && currentViewRect.right < width;
+    }
+
+    private static boolean viewIsPartiallyHiddenLeft(Rect currentViewRect) {
+        return currentViewRect.left > 0;
     }
 }
